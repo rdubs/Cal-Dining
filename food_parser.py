@@ -15,8 +15,8 @@ entrees = [
 ]
 
 def get_dining_info():
-	# response = urllib2.urlopen('http://web.archive.org/web/20141121140003/http://services.housing.berkeley.edu/FoodPro/dining/static/todaysentrees.asp')
-	response = urllib2.urlopen('http://services.housing.berkeley.edu/FoodPro/dining/static/todaysentrees.asp')
+	response = urllib2.urlopen('http://web.archive.org/web/20141121140003/http://services.housing.berkeley.edu/FoodPro/dining/static/todaysentrees.asp')
+	# response = urllib2.urlopen('http://services.housing.berkeley.edu/FoodPro/dining/static/todaysentrees.asp')
 	html = response.read()
 	soup = BeautifulSoup(html)
 	breakfast_entrees = get_entrees(soup, 'B')
@@ -55,7 +55,7 @@ def get_entrees(soup, meal):
 		for entree in entrees:
 			entree_string = unicodedata.normalize('NFKD', entree.text).encode('ascii','ignore')
 			hall_entrees.append(entree_string)
-			update_nutrition(soup, entree_string, entree)
+			# update_nutrition(soup, entree_string, entree)
 		entrees_by_hall.append(hall_entrees)
 		# entrees_by_hall.append([unicodedata.normalize('NFKD', x.text).encode('ascii','ignore') for x in entrees])
 	return entrees_by_hall
@@ -116,3 +116,6 @@ def extract_nutrition(soup, entree):
 			ingredients = ingredients.split(', ')
 			entree_facts['ingredients'] = ingredients
 	return entree_facts
+entrees, bogus = get_dining_info()
+print(entrees)
+
