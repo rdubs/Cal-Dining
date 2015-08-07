@@ -127,7 +127,7 @@ def extract_nutrition(soup, entree):
 			entree_facts['ingredients'] = ingredients
 	return entree_facts
 entrees = get_dining_info()
-print(entrees)
+
 
 # connection = httplib.HTTPSConnection('api.parse.com', 443)
 # connection.connect()
