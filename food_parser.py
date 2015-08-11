@@ -128,21 +128,50 @@ def extract_nutrition(soup, entree):
 	return entree_facts
 entrees = get_dining_info()
 
+connection = httplib.HTTPSConnection('api.parse.com', 443)
+connection.connect()
+connection.request('POST', '/1/batch', json.dumps({
+       "requests": [
+         {
+           "method": "POST",
+           "path": "/1/classes/DiningHall",
+           "body": entrees['crossroads']
+         },
+         {
+           "method": "POST",
+           "path": "/1/classes/DiningHall",
+           "body": entrees['cafe3']
+         },
+         {
+           "method": "POST",
+           "path": "/1/classes/DiningHall",
+           "body": entrees['foothill']
+         },
+         {
+           "method": "POST",
+           "path": "/1/classes/DiningHall",
+           "body": entrees['ckc']
+         }
+       ]
+     }), {
+       "X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
+       "X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa",
+       "Content-Type": "application/json"
+     })
+result = json.loads(connection.getresponse().read())
+print result
+
 
 # connection = httplib.HTTPSConnection('api.parse.com', 443)
 # connection.connect()
-# connection.request('POST', '/1/classes/testClass', json.dumps({
-# 	'hall' : 'crossroads', 
-# 	'breakfast': {'basa': {'fat': '10g', 'salt': '40g'}, 'chips' : {'fat':'1000g', 'grossshit': '100000g'}}, 
-# 	'lunch' : None, 
-# 	'dinner' : None
-# 	}), 
+# connection.request('POST', '/1/classes/DiningHall', json.dumps(entrees['crossroads']),
 # 	{
 #        "X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
 #        "X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa",
 #        "Content-Type": "application/json"
 #      })
-# # results = json.loads(connection.getresponse().read())
+
+# results = json.loads(connection.getresponse().read())
 
 # connection = httplib.HTTPSConnection('api.parse.com', 443)
 # connection.connect()

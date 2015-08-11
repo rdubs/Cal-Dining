@@ -7,12 +7,36 @@
 //
 
 import UIKit
+import Parse
 
 class ViewController: UIViewController {
+    
+    var jsonDiningData : [PFObject] = [PFObject]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        var query = PFQuery(className:"DiningHall")
+        query.findObjectsInBackgroundWithBlock {
+            (objects: [AnyObject]?, error: NSError?) -> Void in
+            
+            if error == nil {
+                // The find succeeded.
+                println("Successfully retrieved \(objects!.count) scores.")
+                // Do something with the found objects
+                if let objects = objects as? [PFObject] {
+                    self.jsonDiningData = objects
+                    print(objects)
+                }
+            } else {
+                // Log details of the failure
+                println("Error: \(error!) \(error!.userInfo!)")
+            }
+        }
+    }
+    
+    func test() {
+        
     }
 
     override func didReceiveMemoryWarning() {
