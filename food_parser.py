@@ -22,6 +22,9 @@ entrees = {
 	'ckc': {'breakfast': None, 'lunch' : None, 'dinner' : None}
 }
 
+dining_hall = ''
+meal_type = ''
+
 def get_dining_info():
 	# url = "http://web.archive.org/web/20141121140003/http://services.housing.berkeley.edu/FoodPro/dining/static/todaysentrees.asp"
 	# req = urllib2.Request(url, headers={'User-Agent' : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.65 Safari/537.36"})
@@ -53,16 +56,22 @@ def get_entrees(soup, meal):
 	Return a list containing all entrees for a certain meal in the format:
 	[[Crossroads_entrees], [Cafe3_entrees], [Foothill_entrees], [CKC_entrees]]
 	"""
+	global meal_type
+	global dining_hall
 	if meal == 'B':
 		tags = soup.find_all('b', text='Breakfast')
+		meal_type = 'Breakfast'
 	elif meal == 'L':
 		tags = soup.find_all('b', text=re.compile('Lunch(/Brunch)?'))
+		meal_type = 'Lunch'
 	elif meal == 'D':
 		tags = 	soup.find_all('b', text='Dinner')
+		meal_type = 'Dinner'
 	entrees_by_hall = []
-	for tag in tags:
-		entrees = tag.next_sibling.find_all('a') #all entrees are <a> tags that are siblings of the <b> meal tag.
+	for i in range(0,4):
+		entrees = tags[i].next_sibling.find_all('a') #all entrees are <a> tags that are siblings of the <b> meal tag.
 		hall_entrees = {}
+		dining_hall = index_to_dining_hall_mapping[i]
 		for entree in entrees:
 			entree_string = unicodedata.normalize('NFKD', entree.text).encode('ascii','ignore')
 			hall_entrees[entree_string] = update_nutrition(soup, entree_string, entree)
@@ -71,11 +80,28 @@ def get_entrees(soup, meal):
 	return entrees_by_hall
 
 def update_nutrition(soup, entree_string, entree):
-	if entree_string not in entrees_seen:
-		entree_dict = extract_nutrition(soup, entree)
-		entrees_with_nutrition_facts.append(entree_dict)
-		entrees_seen.add(entree_string)
-		return entree_dict
+	entree_dict = extract_nutrition(soup, entree)
+	entree_dict['name'] = entree_string
+	
+	#set where the dining hall and meal type keys
+	entree_dict['dining_hall'] = dining_hall
+	entree_dict['meal_type'] = meal_type
+
+	#send to parse
+	connection = httplib.HTTPSConnection('api.parse.com', 443)
+	connection.connect()
+	connection.request('POST', '/1/classes/Entree', json.dumps(entree_dict),
+	{
+		"X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
+		"X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa",
+		"Content-Type": "application/json"
+	})
+
+	# results = json.loads(connection.getresponse().read())
+
+	entrees_with_nutrition_facts.append(entree_dict)
+	entrees_seen.add(entree_string)
+	return entree_dict
 
 def extract_nutrition(soup, entree):
 	response = urllib2.urlopen('http://services.housing.berkeley.edu/FoodPro/dining/static/' + entree.get('href'))
@@ -127,58 +153,3 @@ def extract_nutrition(soup, entree):
 			entree_facts['ingredients'] = ingredients
 	return entree_facts
 entrees = get_dining_info()
-
-connection = httplib.HTTPSConnection('api.parse.com', 443)
-connection.connect()
-connection.request('POST', '/1/batch', json.dumps({
-       "requests": [
-         {
-           "method": "POST",
-           "path": "/1/classes/DiningHall",
-           "body": entrees['crossroads']
-         },
-         {
-           "method": "POST",
-           "path": "/1/classes/DiningHall",
-           "body": entrees['cafe3']
-         },
-         {
-           "method": "POST",
-           "path": "/1/classes/DiningHall",
-           "body": entrees['foothill']
-         },
-         {
-           "method": "POST",
-           "path": "/1/classes/DiningHall",
-           "body": entrees['ckc']
-         }
-       ]
-     }), {
-       "X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
-       "X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa",
-       "Content-Type": "application/json"
-     })
-result = json.loads(connection.getresponse().read())
-print result
-
-
-# connection = httplib.HTTPSConnection('api.parse.com', 443)
-# connection.connect()
-# connection.request('POST', '/1/classes/DiningHall', json.dumps(entrees['crossroads']),
-# 	{
-#        "X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
-#        "X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa",
-#        "Content-Type": "application/json"
-#      })
-
-# results = json.loads(connection.getresponse().read())
-
-# connection = httplib.HTTPSConnection('api.parse.com', 443)
-# connection.connect()
-# connection.request('GET', '/1/classes/testClass/9sWOlBHWAS', '', {
-#        "X-Parse-Application-Id": "pBlshDn1gMVHTKTgmUxZOK4h62TyA05jrUVOE7Ri",
-#        "X-Parse-REST-API-Key": "8v09lw9nLQA782PGShSGi6Qzq1WSYS6ZPUam5zsa"
-#      })
-# result = json.loads(connection.getresponse().read())
-# print result['breakfast']['basa']
-

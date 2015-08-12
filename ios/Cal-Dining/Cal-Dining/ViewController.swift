@@ -11,26 +11,19 @@ import Parse
 
 class ViewController: UIViewController {
     
-    var jsonDiningData : [PFObject] = [PFObject]()
+    var diningHalls : [PFObject] = [PFObject]()
+    var entrees : [PFObject] = [PFObject]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        var query = PFQuery(className:"DiningHall")
+        let predicate = NSPredicate(format: "dining_hall = 'ckc' AND meal_type = 'Dinner'")
+        var query = PFQuery(className: "Entree", predicate: predicate)
         query.findObjectsInBackgroundWithBlock {
-            (objects: [AnyObject]?, error: NSError?) -> Void in
-            
+            (results: [AnyObject]?, error: NSError?) -> Void in
             if error == nil {
-                // The find succeeded.
-                println("Successfully retrieved \(objects!.count) scores.")
-                // Do something with the found objects
-                if let objects = objects as? [PFObject] {
-                    self.jsonDiningData = objects
-                    print(objects)
-                }
-            } else {
-                // Log details of the failure
-                println("Error: \(error!) \(error!.userInfo!)")
+                // results contains players with lots of wins or only a few wins.
+                print(results)
             }
         }
     }
