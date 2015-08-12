@@ -148,7 +148,8 @@ def extract_nutrition(soup, entree):
 			allergens = allergens.split(', ')
 			entree_facts['allergens'] = allergens
 		elif 'INGREDIENTS:' in text:
-			ingredients = text.strip('INGREDIENTS:  ')
+			ingredients = text.strip('INGREDIENTS:')
+			ingredients = ingredients.strip()
 			ingredients = ingredients.split(', ')
 			entree_facts['ingredients'] = ingredients
 	return entree_facts
