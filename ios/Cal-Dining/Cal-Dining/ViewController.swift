@@ -10,23 +10,39 @@ import UIKit
 import Parse
 
 class ViewController: UIViewController {
+    var entreesByDiningHall =  [String: [String: [PFObject]]]()
+    var halls =  ["crossroads",
+                "cafe3",
+                "foothill",
+                "ckc"
+    ]
     
-    var diningHalls : [PFObject] = [PFObject]()
-    var entrees : [PFObject] = [PFObject]()
-
+    var meals =  ["Breakfast",
+        "Lunch",
+        "Dinner",
+    ]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        let predicate = NSPredicate(format: "dining_hall = 'ckc' AND meal_type = 'Dinner'")
-        var query = PFQuery(className: "Entree", predicate: predicate)
-        query.findObjectsInBackgroundWithBlock {
-            (results: [AnyObject]?, error: NSError?) -> Void in
-            if error == nil {
-                // results contains players with lots of wins or only a few wins.
-                print(results)
+        for meal_index in 0...2 {
+            var meal = self.meals[meal_index]
+            for index in 0...3 {
+                var hall = self.halls[index]
+                var predicate = NSPredicate(format: "dining_hall = '\(hall)' AND meal_type = 'Breakfast'")
+                var query = PFQuery(className: "Entree", predicate: predicate)
+                query.findObjectsInBackgroundWithBlock {
+                    (results: [AnyObject]?, error: NSError?) -> Void in
+                    if error == nil {
+                        self.entreesByDiningHall[hall]![meal] = results as! [PFObject]
+                        print(results)
+                        print("test")
+                    }
+                }
             }
         }
     }
+        
     
     func test() {
         
